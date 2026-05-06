@@ -71,13 +71,6 @@ class CalificacionBase(BaseModel):
     nota: Optional[float] = Field(None, ge=0, le=20)
     observacion: Optional[str] = None
 
-    @field_validator("nota")
-    @classmethod
-    def nota_valida(cls, v):
-        if v is not None and not (0 <= v <= 20):
-            raise ValueError("La nota debe estar entre 0 y 20")
-        return v
-
 
 class CalificacionCreate(CalificacionBase):
     estudiante_id: int
