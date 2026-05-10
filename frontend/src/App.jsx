@@ -22,13 +22,14 @@ function Intro({ onDone }) {
   return (
     <div className="intro-screen">
       <div className="intro-content">
-        <div className="intro-logo">SUKEI</div>
-        <div className="intro-tagline">Sistema de Inteligencia Educativa</div>
-        <div className="intro-bar"><div className="intro-bar-fill" /></div>
+        <h1 className="intro-title">Sistema de<br />Inteligencia<br />Educativa<br />2026</h1>
+        <div className="intro-brand">
+          <span className="intro-brand-name">SUKEI</span>
+          <span className="intro-brand-sub">by Susana Roque</span>
+        </div>
       </div>
     </div>
   );
-}
 
 // ── Bienvenida ─────────────────────────────────────────────────────────────
 function Welcome({ onEnter }) {
