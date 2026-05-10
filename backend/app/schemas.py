@@ -6,19 +6,26 @@ from datetime import datetime
 # ── Estudiante ──────────────────────────────────────────────────────────────
 
 class EstudianteBase(BaseModel):
+    # Perfil Básico
     nombre: str
     apellido: str
-    edad: Optional[int] = None
+    dni: Optional[str] = None
+    fecha_nacimiento: Optional[str] = None
     sexo: Optional[str] = None
+    telefono: Optional[str] = None
     distrito_residencia: Optional[str] = None
     estado_civil: Optional[str] = None
     carga_familiar: Optional[int] = None
     situacion_economica: Optional[str] = None
-    tipo_negocio: Optional[str] = None
-    actividad_comercial: Optional[str] = None
-    inversion: Optional[float] = None
-    experiencia_previa: Optional[str] = None
-    horas_unidad: Optional[float] = None
+    # Perfil Académico
+    modalidad_ingreso: Optional[str] = None
+    nivel_educativo: Optional[str] = None
+    # Perfil de Emprendimiento
+    tiene_negocio: Optional[str] = None
+    rubro_emprendimiento: Optional[str] = None
+    objetivo_termino: Optional[str] = None
+    capital_inicial: Optional[str] = None
+    anios_experiencia: Optional[str] = None
 
 
 class EstudianteCreate(EstudianteBase):
@@ -90,7 +97,7 @@ class CalificacionOut(CalificacionBase):
     model_config = {"from_attributes": True}
 
 
-# ── Grilla (matrícula completa de un estudiante) ──────────────────────────────
+# ── Grilla ────────────────────────────────────────────────────────────────────
 
 class GrillaItem(BaseModel):
     indicador_id: int
