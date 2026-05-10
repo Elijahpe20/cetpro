@@ -2,15 +2,50 @@ import { useState, useEffect } from "react";
 import { estudiantesAPI } from "../api/client";
 
 const EMPTY = {
-  nombre: "", apellido: "", edad: "", sexo: "", distrito_residencia: "",
-  estado_civil: "", carga_familiar: "", situacion_economica: "",
-  tipo_negocio: "", actividad_comercial: "", inversion: "",
-  experiencia_previa: "", horas_unidad: "",
+  nombre: "", apellido: "", dni: "", fecha_nacimiento: "", sexo: "",
+  telefono: "", distrito_residencia: "", estado_civil: "",
+  carga_familiar: "", situacion_economica: "",
+  modalidad_ingreso: "", nivel_educativo: "",
+  tiene_negocio: "", rubro_emprendimiento: "", objetivo_termino: "",
+  capital_inicial: "", anios_experiencia: "",
 };
 
 const SEXOS = ["Femenino", "Masculino", "Otro"];
 const ESTADOS = ["Soltero/a", "Casado/a", "Conviviente", "Divorciado/a", "Viudo/a"];
 const SITUACIONES = ["Baja", "Media", "Alta"];
+const MODALIDADES = ["Primera vez", "Reingreso", "Traslado"];
+const NIVELES = ["Primaria", "Secundaria incompleta", "Secundaria completa", "Superior"];
+const TIENE_NEGOCIO = ["Sí", "No"];
+const RUBROS = [
+  "Confección de ropa en general",
+  "Disfraces y vestimenta especial",
+  "Uniformes escolares / corporativos",
+  "Bordados y acabados",
+  "Venta de telas e insumos",
+  "Comercio de ropa (reventa)",
+  "Aún no definido",
+];
+const OBJETIVOS = [
+  "Crear mi propio negocio",
+  "Fortalecer negocio existente",
+  "Conseguir empleo dependiente",
+  "Mejorar mis habilidades personales",
+];
+const CAPITALES = [
+  "Sin capital",
+  "S/. 500 - 1,000",
+  "S/. 1,001 - 3,000",
+  "S/. 3,001 - 5,000",
+  "S/. 5,001 - 10,000",
+  "S/. 10,001 - 20,000",
+  "Más de S/. 20,000",
+];
+const EXPERIENCIA = [
+  "Sin experiencia",
+  "1 - 2 años",
+  "3 - 5 años",
+  "Más de 5 años",
+];
 
 export default function Students() {
   const [estudiantes, setEstudiantes] = useState([]);
@@ -32,20 +67,21 @@ export default function Students() {
 
   const openNew = () => { setForm(EMPTY); setEditId(null); setShowForm(true); };
   const openEdit = (e) => {
-    setForm({ ...e, edad: e.edad ?? "", carga_familiar: e.carga_familiar ?? "", inversion: e.inversion ?? "", horas_unidad: e.horas_unidad ?? "" });
-    setEditId(e.id); setShowForm(true);
+    setForm({ ...EMPTY, ...e, carga_familiar: e.carga_familiar ?? "" });
+    setEditId(e.id);
+    setShowForm(true);
   };
 
   const handleSave = async () => {
     const payload = { ...form };
-    ["edad","carga_familiar"].forEach(k => { payload[k] = payload[k] !== "" ? parseInt(payload[k]) : null; });
-    ["inversion","horas_unidad"].forEach(k => { payload[k] = payload[k] !== "" ? parseFloat(payload[k]) : null; });
+    payload.carga_familiar = payload.carga_familiar !== "" ? parseInt(payload.carga_familiar) : null;
     if (editId) {
       await estudiantesAPI.actualizar(editId, payload);
     } else {
       await estudiantesAPI.crear(payload);
     }
-    setShowForm(false); fetchAll();
+    setShowForm(false);
+    fetchAll();
   };
 
   const handleDelete = async (id) => {
@@ -53,6 +89,8 @@ export default function Students() {
     await estudiantesAPI.eliminar(id);
     fetchAll();
   };
+
+  const set = (key, val) => setForm(p => ({ ...p, [key]: val }));
 
   const filtered = estudiantes.filter(e =>
     `${e.nombre} ${e.apellido}`.toLowerCase().includes(search.toLowerCase())
@@ -64,10 +102,11 @@ export default function Students() {
       <div className="flex items-center justify-between mb-6">
         <div>
           <h2 className="text-2xl font-bold text-slate-800">Estudiantes</h2>
-          <p className="text-slate-500 text-sm mt-0.5">{estudiantes.length} registrados</p>
+          <p className="text-slate-500 text-sm mt-0.5">{estudiantes.length} registradas</p>
         </div>
-        <button onClick={openNew} className="bg-teal-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-teal-700 transition">
-          + Nuevo estudiante
+        <button onClick={openNew}
+          className="bg-teal-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-teal-700 transition">
+          + Nueva estudiante
         </button>
       </div>
 
@@ -86,7 +125,7 @@ export default function Students() {
           <table className="w-full text-sm">
             <thead className="bg-slate-50 text-slate-500 text-xs uppercase tracking-wide">
               <tr>
-                {["Apellido","Nombre","Edad","Sexo","Distrito","Sit. Económica","Negocio","Acciones"].map(h => (
+                {["Apellido", "Nombre", "DNI", "Sexo", "Distrito", "Sit. Económica", "Negocio", "Rubro", "Acciones"].map(h => (
                   <th key={h} className="px-4 py-3 text-left">{h}</th>
                 ))}
               </tr>
@@ -96,7 +135,7 @@ export default function Students() {
                 <tr key={e.id} className="hover:bg-slate-50 transition">
                   <td className="px-4 py-3 font-medium text-slate-800">{e.apellido}</td>
                   <td className="px-4 py-3 text-slate-600">{e.nombre}</td>
-                  <td className="px-4 py-3 text-slate-500">{e.edad ?? "—"}</td>
+                  <td className="px-4 py-3 text-slate-500">{e.dni ?? "—"}</td>
                   <td className="px-4 py-3 text-slate-500">{e.sexo ?? "—"}</td>
                   <td className="px-4 py-3 text-slate-500">{e.distrito_residencia ?? "—"}</td>
                   <td className="px-4 py-3">
@@ -108,7 +147,14 @@ export default function Students() {
                       }`}>{e.situacion_economica}</span>
                     )}
                   </td>
-                  <td className="px-4 py-3 text-slate-500 max-w-xs truncate">{e.tipo_negocio ?? "—"}</td>
+                  <td className="px-4 py-3">
+                    {e.tiene_negocio && (
+                      <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${
+                        e.tiene_negocio === "Sí" ? "bg-teal-100 text-teal-700" : "bg-slate-100 text-slate-500"
+                      }`}>{e.tiene_negocio}</span>
+                    )}
+                  </td>
+                  <td className="px-4 py-3 text-slate-500 max-w-xs truncate">{e.rubro_emprendimiento ?? "—"}</td>
                   <td className="px-4 py-3">
                     <div className="flex gap-2">
                       <button onClick={() => openEdit(e)} className="text-teal-600 hover:underline text-xs">Editar</button>
@@ -118,7 +164,7 @@ export default function Students() {
                 </tr>
               ))}
               {filtered.length === 0 && (
-                <tr><td colSpan={8} className="px-4 py-8 text-center text-slate-400">No hay estudiantes registrados.</td></tr>
+                <tr><td colSpan={9} className="px-4 py-8 text-center text-slate-400">No hay estudiantes registradas.</td></tr>
               )}
             </tbody>
           </table>
@@ -129,45 +175,71 @@ export default function Students() {
       {showForm && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-2xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-            <div className="px-6 py-4 border-b border-slate-100 flex justify-between items-center">
-              <h3 className="font-semibold text-slate-800">{editId ? "Editar estudiante" : "Nuevo estudiante"}</h3>
+            <div className="px-6 py-4 border-b border-slate-100 flex justify-between items-center sticky top-0 bg-white z-10">
+              <h3 className="font-semibold text-slate-800">{editId ? "Editar estudiante" : "Nueva estudiante"}</h3>
               <button onClick={() => setShowForm(false)} className="text-slate-400 hover:text-slate-600 text-xl">×</button>
             </div>
-            <div className="p-6 space-y-6">
-              {/* Datos básicos */}
+
+            <div className="p-6 space-y-7">
+
+              {/* ── Perfil Básico ── */}
               <section>
-                <h4 className="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-3">Datos básicos</h4>
+                <div className="flex items-center gap-2 mb-4">
+                  <span className="text-teal-600 text-base">👤</span>
+                  <h4 className="text-xs font-bold text-teal-700 uppercase tracking-widest">Perfil Básico</h4>
+                </div>
                 <div className="grid grid-cols-2 gap-3">
-                  <Field label="Nombre *" value={form.nombre} onChange={v => setForm({...form, nombre:v})} />
-                  <Field label="Apellido *" value={form.apellido} onChange={v => setForm({...form, apellido:v})} />
-                  <Field label="Edad" type="number" value={form.edad} onChange={v => setForm({...form, edad:v})} />
-                  <SelectField label="Sexo" value={form.sexo} options={SEXOS} onChange={v => setForm({...form, sexo:v})} />
-                  <Field label="Distrito de residencia" value={form.distrito_residencia} onChange={v => setForm({...form, distrito_residencia:v})} />
-                  <SelectField label="Estado civil" value={form.estado_civil} options={ESTADOS} onChange={v => setForm({...form, estado_civil:v})} />
-                  <Field label="Carga familiar (N° dependientes)" type="number" value={form.carga_familiar} onChange={v => setForm({...form, carga_familiar:v})} />
-                  <SelectField label="Situación económica" value={form.situacion_economica} options={SITUACIONES} onChange={v => setForm({...form, situacion_economica:v})} />
+                  <Field label="Nombre *" value={form.nombre} onChange={v => set("nombre", v)} />
+                  <Field label="Apellido *" value={form.apellido} onChange={v => set("apellido", v)} />
+                  <Field label="DNI" value={form.dni} onChange={v => set("dni", v)} maxLength={8} />
+                  <Field label="Fecha de nacimiento" type="date" value={form.fecha_nacimiento} onChange={v => set("fecha_nacimiento", v)} />
+                  <SelectField label="Sexo" value={form.sexo} options={SEXOS} onChange={v => set("sexo", v)} />
+                  <Field label="Teléfono" value={form.telefono} onChange={v => set("telefono", v)} />
+                  <Field label="Distrito de residencia" value={form.distrito_residencia} onChange={v => set("distrito_residencia", v)} />
+                  <SelectField label="Estado civil" value={form.estado_civil} options={ESTADOS} onChange={v => set("estado_civil", v)} />
+                  <Field label="Carga familiar (N° dependientes)" type="number" value={form.carga_familiar} onChange={v => set("carga_familiar", v)} />
+                  <SelectField label="Situación económica" value={form.situacion_economica} options={SITUACIONES} onChange={v => set("situacion_economica", v)} />
                 </div>
               </section>
-              {/* Emprendimiento */}
+
+              <hr className="border-slate-100" />
+
+              {/* ── Perfil Académico ── */}
               <section>
-                <h4 className="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-3">Perfil de emprendimiento</h4>
+                <div className="flex items-center gap-2 mb-4">
+                  <span className="text-teal-600 text-base">🎓</span>
+                  <h4 className="text-xs font-bold text-teal-700 uppercase tracking-widest">Perfil Académico</h4>
+                </div>
                 <div className="grid grid-cols-2 gap-3">
-                  <Field label="Tipo de negocio" value={form.tipo_negocio} onChange={v => setForm({...form, tipo_negocio:v})} />
-                  <Field label="Actividad comercial" value={form.actividad_comercial} onChange={v => setForm({...form, actividad_comercial:v})} />
-                  <Field label="Inversión (S/.)" type="number" value={form.inversion} onChange={v => setForm({...form, inversion:v})} />
+                  <SelectField label="Modalidad de ingreso" value={form.modalidad_ingreso} options={MODALIDADES} onChange={v => set("modalidad_ingreso", v)} />
+                  <SelectField label="Nivel educativo" value={form.nivel_educativo} options={NIVELES} onChange={v => set("nivel_educativo", v)} />
                 </div>
               </section>
-              {/* Académico */}
+
+              <hr className="border-slate-100" />
+
+              {/* ── Perfil de Emprendimiento ── */}
               <section>
-                <h4 className="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-3">Rendimiento y seguimiento</h4>
+                <div className="flex items-center gap-2 mb-4">
+                  <span className="text-teal-600 text-base">💼</span>
+                  <h4 className="text-xs font-bold text-teal-700 uppercase tracking-widest">Perfil de Emprendimiento</h4>
+                </div>
                 <div className="grid grid-cols-2 gap-3">
-                  <Field label="Experiencia previa" value={form.experiencia_previa} onChange={v => setForm({...form, experiencia_previa:v})} />
-                  <Field label="Horas de unidad" type="number" value={form.horas_unidad} onChange={v => setForm({...form, horas_unidad:v})} />
+                  <SelectField label="¿Tiene negocio activo?" value={form.tiene_negocio} options={TIENE_NEGOCIO} onChange={v => set("tiene_negocio", v)} />
+                  <SelectField label="Rubro de emprendimiento" value={form.rubro_emprendimiento} options={RUBROS} onChange={v => set("rubro_emprendimiento", v)} />
+                  <SelectField label="Objetivo al terminar el curso" value={form.objetivo_termino} options={OBJETIVOS} onChange={v => set("objetivo_termino", v)} />
+                  <SelectField label="Capital inicial" value={form.capital_inicial} options={CAPITALES} onChange={v => set("capital_inicial", v)} />
+                  <SelectField label="Años de experiencia en el rubro" value={form.anios_experiencia} options={EXPERIENCIA} onChange={v => set("anios_experiencia", v)} />
                 </div>
               </section>
+
             </div>
-            <div className="px-6 py-4 border-t border-slate-100 flex justify-end gap-3">
-              <button onClick={() => setShowForm(false)} className="px-4 py-2 text-sm text-slate-600 hover:bg-slate-100 rounded-lg">Cancelar</button>
+
+            <div className="px-6 py-4 border-t border-slate-100 flex justify-end gap-3 sticky bottom-0 bg-white">
+              <button onClick={() => setShowForm(false)}
+                className="px-4 py-2 text-sm text-slate-600 hover:bg-slate-100 rounded-lg">
+                Cancelar
+              </button>
               <button onClick={handleSave} disabled={!form.nombre || !form.apellido}
                 className="px-4 py-2 text-sm bg-teal-600 text-white rounded-lg hover:bg-teal-700 disabled:opacity-40">
                 {editId ? "Guardar cambios" : "Crear estudiante"}
@@ -180,11 +252,12 @@ export default function Students() {
   );
 }
 
-function Field({ label, value, onChange, type = "text" }) {
+function Field({ label, value, onChange, type = "text", maxLength }) {
   return (
     <div>
       <label className="block text-xs text-slate-500 mb-1">{label}</label>
       <input type={type} value={value} onChange={e => onChange(e.target.value)}
+        maxLength={maxLength}
         className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-teal-400" />
     </div>
   );
