@@ -1,7 +1,11 @@
+import { useState, useEffect } from "react";
 import { BrowserRouter, Routes, Route, NavLink } from "react-router-dom";
 import Students from "./pages/Students";
 import GradeEntry from "./pages/GradeEntry";
 import Dashboard from "./pages/Dashboard";
+
+// ── Pantallas ──────────────────────────────────────────────────────────────
+// 0 = Intro   1 = Bienvenida   2 = App principal
 
 const nav = [
   { to: "/", label: "Dashboard", icon: "📊" },
@@ -9,28 +13,69 @@ const nav = [
   { to: "/calificaciones", label: "Calificaciones", icon: "📝" },
 ];
 
-export default function App() {
+// ── Intro ──────────────────────────────────────────────────────────────────
+function Intro({ onDone }) {
+  useEffect(() => {
+    const t = setTimeout(onDone, 2600);
+    return () => clearTimeout(t);
+  }, [onDone]);
+
+  return (
+    <div className="intro-screen">
+      <div className="intro-content">
+        <div className="intro-logo">SUKEI</div>
+        <div className="intro-tagline">Sistema de Inteligencia Educativa</div>
+        <div className="intro-bar"><div className="intro-bar-fill" /></div>
+      </div>
+    </div>
+  );
+}
+
+// ── Bienvenida ─────────────────────────────────────────────────────────────
+function Welcome({ onEnter }) {
+  return (
+    <div className="welcome-screen">
+      <div className="welcome-card">
+        <div className="welcome-year">2026</div>
+        <h1 className="welcome-title">Sistema de<br />Inteligencia<br />Educativa</h1>
+        <div className="welcome-divider" />
+        <div className="welcome-nav">
+          {nav.map((n) => (
+            <button key={n.to} className="welcome-btn" onClick={() => onEnter(n.to)}>
+              <span className="welcome-btn-icon">{n.icon}</span>
+              {n.label}
+            </button>
+          ))}
+        </div>
+        <div className="welcome-brand">
+          <span className="welcome-brand-name">SUKEI</span>
+          <span className="welcome-brand-sub">by Susana Roque</span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── App principal ──────────────────────────────────────────────────────────
+function MainApp({ initialPath }) {
   return (
     <BrowserRouter>
-      <div className="flex h-screen bg-slate-50 font-sans">
+      <InitialNavigator path={initialPath} />
+      <div className="app-shell">
         {/* Sidebar */}
-        <aside className="w-64 bg-slate-900 text-white flex flex-col shrink-0">
-          <div className="px-6 py-5 border-b border-slate-700">
-            <h1 className="text-lg font-bold text-teal-400 leading-tight">CETPRO</h1>
-            <p className="text-xs text-slate-400 mt-0.5">Sistema de Inteligencia Educativa</p>
+        <aside className="sidebar">
+          <div className="sidebar-brand">
+            <span className="sidebar-logo">SUKEI</span>
+            <span className="sidebar-sub">Sistema de Inteligencia Educativa</span>
           </div>
-          <nav className="flex-1 px-3 py-4 space-y-1">
+          <nav className="sidebar-nav">
             {nav.map((n) => (
               <NavLink
                 key={n.to}
                 to={n.to}
                 end={n.to === "/"}
                 className={({ isActive }) =>
-                  `flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm transition-colors ${
-                    isActive
-                      ? "bg-teal-600 text-white font-medium"
-                      : "text-slate-300 hover:bg-slate-800"
-                  }`
+                  `sidebar-link${isActive ? " sidebar-link--active" : ""}`
                 }
               >
                 <span>{n.icon}</span>
@@ -38,13 +83,14 @@ export default function App() {
               </NavLink>
             ))}
           </nav>
-          <div className="px-6 py-4 border-t border-slate-700">
-            <p className="text-xs text-slate-500">Fase 1 · v1.0.0</p>
+          <div className="sidebar-footer">
+            <span className="sidebar-brand-mark">SUKEI</span>
+            <span className="sidebar-version">Fase 1 · v1.0.0</span>
           </div>
         </aside>
 
         {/* Content */}
-        <main className="flex-1 overflow-auto">
+        <main className="main-content">
           <Routes>
             <Route path="/" element={<Dashboard />} />
             <Route path="/estudiantes" element={<Students />} />
@@ -54,4 +100,31 @@ export default function App() {
       </div>
     </BrowserRouter>
   );
+}
+
+// Helper: navega a la ruta elegida en la bienvenida
+function InitialNavigator({ path }) {
+  const [done, setDone] = useState(false);
+  useEffect(() => {
+    if (!done && path !== "/") {
+      window.history.replaceState(null, "", path);
+      setDone(true);
+    }
+  }, [path, done]);
+  return null;
+}
+
+// ── Root ───────────────────────────────────────────────────────────────────
+export default function App() {
+  const [phase, setPhase] = useState(0);   // 0 intro · 1 welcome · 2 app
+  const [startPath, setStartPath] = useState("/");
+
+  const handleEnter = (path) => {
+    setStartPath(path);
+    setPhase(2);
+  };
+
+  if (phase === 0) return <Intro onDone={() => setPhase(1)} />;
+  if (phase === 1) return <Welcome onEnter={handleEnter} />;
+  return <MainApp initialPath={startPath} />;
 }
