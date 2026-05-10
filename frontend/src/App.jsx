@@ -30,7 +30,7 @@ function Intro({ onDone }) {
       </div>
     </div>
   );
-
+}
 // ── Bienvenida ─────────────────────────────────────────────────────────────
 function Welcome({ onEnter }) {
   return (
