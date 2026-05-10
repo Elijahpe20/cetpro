@@ -4,7 +4,6 @@ import Students from "./pages/Students";
 import GradeEntry from "./pages/GradeEntry";
 import Dashboard from "./pages/Dashboard";
 
-// ── Pantallas ──────────────────────────────────────────────────────────────
 // 0 = Intro   1 = Bienvenida   2 = App principal
 
 const nav = [
@@ -16,7 +15,7 @@ const nav = [
 // ── Intro ──────────────────────────────────────────────────────────────────
 function Intro({ onDone }) {
   useEffect(() => {
-    const t = setTimeout(onDone, 2600);
+    const t = setTimeout(onDone, 2800);
     return () => clearTimeout(t);
   }, [onDone]);
 
@@ -35,10 +34,29 @@ function Intro({ onDone }) {
 function Welcome({ onEnter }) {
   return (
     <div className="welcome-screen">
-      <div className="welcome-card">
-        <div className="welcome-year">2026</div>
-        <h1 className="welcome-title">Sistema de<br />Inteligencia<br />Educativa</h1>
-        <div className="welcome-divider" />
+      {/* Columna izquierda: título */}
+      <div className="welcome-left">
+        <div className="welcome-year-badge">2026</div>
+        <h1 className="welcome-title">
+          Sistema de<br />Inteligencia<br />Educativa
+        </h1>
+      </div>
+
+      {/* Columna derecha: foto + nav + marca */}
+      <div className="welcome-right">
+        <div className="welcome-avatar-wrap">
+          <img
+            src="/assets/foto_perfil.jpg"
+            alt="Susana Roque"
+            className="welcome-avatar"
+            onError={e => {
+              e.target.style.display = "none";
+              e.target.nextSibling.style.display = "flex";
+            }}
+          />
+          <div className="welcome-avatar-fallback" style={{ display: "none" }}>SR</div>
+        </div>
+
         <div className="welcome-nav">
           {nav.map((n) => (
             <button key={n.to} className="welcome-btn" onClick={() => onEnter(n.to)}>
@@ -47,6 +65,7 @@ function Welcome({ onEnter }) {
             </button>
           ))}
         </div>
+
         <div className="welcome-brand">
           <span className="welcome-brand-name">SUKEI</span>
           <span className="welcome-brand-sub">by Susana Roque</span>
@@ -62,12 +81,13 @@ function MainApp({ initialPath }) {
     <BrowserRouter>
       <InitialNavigator path={initialPath} />
       <div className="app-shell">
-        {/* Sidebar */}
         <aside className="sidebar">
           <div className="sidebar-brand">
-            <span className="sidebar-logo">SUKEI</span>
-            <span className="sidebar-sub">Sistema de Inteligencia Educativa</span>
+            <span className="sidebar-title">
+              Sistema de<br />Inteligencia<br />Educativa<br />2026
+            </span>
           </div>
+
           <nav className="sidebar-nav">
             {nav.map((n) => (
               <NavLink
@@ -83,13 +103,14 @@ function MainApp({ initialPath }) {
               </NavLink>
             ))}
           </nav>
+
           <div className="sidebar-footer">
             <span className="sidebar-brand-mark">SUKEI</span>
+            <span className="sidebar-brand-sub-small">by Susana Roque</span>
             <span className="sidebar-version">Fase 1 · v1.0.0</span>
           </div>
         </aside>
 
-        {/* Content */}
         <main className="main-content">
           <Routes>
             <Route path="/" element={<Dashboard />} />
@@ -102,7 +123,6 @@ function MainApp({ initialPath }) {
   );
 }
 
-// Helper: navega a la ruta elegida en la bienvenida
 function InitialNavigator({ path }) {
   const [done, setDone] = useState(false);
   useEffect(() => {
@@ -114,9 +134,8 @@ function InitialNavigator({ path }) {
   return null;
 }
 
-// ── Root ───────────────────────────────────────────────────────────────────
 export default function App() {
-  const [phase, setPhase] = useState(0);   // 0 intro · 1 welcome · 2 app
+  const [phase, setPhase] = useState(0);
   const [startPath, setStartPath] = useState("/");
 
   const handleEnter = (path) => {
